@@ -22,7 +22,8 @@ export const bookMeeting = tool({
         throw new Error('CAL_EVENT_TYPE_ID is not set in environment variables');
       }
 
-      const eventTypeId = process.env.CAL_EVENT_TYPE_ID;
+      const eventTypeId = parseInt(process.env.CAL_EVENT_TYPE_ID || '0');
+
       const converted_timezone = getCurrentTimezone() || "Africa/Nairobi";
 
       // Convert time to UTC ISO 8601 format
