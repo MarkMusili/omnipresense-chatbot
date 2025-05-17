@@ -10,6 +10,9 @@ export const bookMeeting = tool({
     email: z.string().describe('Email of the person booking the meeting'),
   }),
   execute: async ({ start, name, email}) => {
+    const url = 'https://api.cal.com/v2/bookings';
+    let requestBody;
+
     try {
       const api_key = process.env.CAL_API_KEY;
       const event_type_id = process.env.CAL_EVENT_TYPE_ID;
@@ -22,18 +25,15 @@ export const bookMeeting = tool({
         throw new Error('CAL_EVENT_TYPE_ID is not set in environment variables');
       }
 
-
       const eventTypeId = process.env.CAL_EVENT_TYPE_ID;
 
       const converted_timezone = getCurrentTimezone() || "Africa/Nairobi";
 
       const start_time = convertTimeToUTC(start);
 
-      const url = 'https://api.cal.com/v2/bookings';
-
-      const requestBody = {
+      requestBody = {
         eventTypeId: eventTypeId,
-        start: start,
+        start: start_time, // Using converted UTC time
         attendee: {
           name: name,
           email: email,
@@ -54,9 +54,46 @@ export const bookMeeting = tool({
         body: JSON.stringify(requestBody),
       });
 
-      return response;
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        console.error('Cal.com API Error:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: responseData
+        });
+        throw new Error(`Cal.com API error: ${response.status} - ${JSON.stringify(responseData)}`);
+      }
+
+      return {
+        success: true,
+        data: responseData,
+        request: {
+          url,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'cal-api-version': '2024-08-13',
+          },
+          body: requestBody
+        }
+      };
+
     } catch (error) {
-        return error instanceof Error ? error.message : String(error);
+      console.error('Booking error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+        request: {
+          url,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'cal-api-version': '2024-08-13',
+          },
+          body: requestBody
+        }
+      };
     }
 },
 });
