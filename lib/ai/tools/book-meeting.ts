@@ -54,7 +54,7 @@ export const bookMeeting = tool({
         body: JSON.stringify(requestBody),
       });
 
-      return response.text();
+      return response;
     } catch (error) {
         return error instanceof Error ? error.message : String(error);
     }
