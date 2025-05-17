@@ -63,28 +63,10 @@ export const bookMeeting = tool({
         body: JSON.stringify(requestBody),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        return {
-          success: false,
-          status: response.status,
-          error: 'Failed to book meeting with Cal.com',
-          details: errorData || response.statusText
-        };
-      }
-
-      const data = await response.json();
-      return {
-        success: true,
-        data,
-        message: 'Meeting successfully booked'
-      };
-    } catch (error) {
-        return {
-          success: false,
-          error: 'Failed to book meeting',
-          details: error instanceof Error ? error.message : String(error)
-        };
+    const data = await response.text();
+    return data;
+    } catch (error: unknown) {
+        return error instanceof Error ? error : String(error);
     }
 },
 });

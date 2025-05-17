@@ -1,15 +1,12 @@
 import type { ArtifactKind } from '@/components/artifact';
 import type { Geo } from '@vercel/functions';
 
-// Tools instructions
-export const toolsPrompt = `
-When using the bookMeeting tool, always format the time parameter as an ISO 8601 string (YYYY-MM-DDTHH:MM:SS).
-For example:
-- "2024-10-15T14:00:00" for October 15, 2024 at 2:00 PM
-- "2024-11-20T09:30:00" for November 20, 2024 at 9:30 AM
 
-Never use natural language time formats like "tomorrow at 3pm" when using this tool.
-`;
+// Tools instructions
+export const toolsPrompt = `You're a scheduling assistant. Today is ${Date.now}.
+You can help users by:
+- Creating new bookings
+Always confirm important details before making bookings.`
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
