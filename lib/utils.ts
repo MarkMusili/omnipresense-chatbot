@@ -89,3 +89,12 @@ export function getTrailingMessageId({
 export function sanitizeText(text: string) {
   return text.replace('<has_function_call>', '');
 }
+
+export function getCurrentTimezone() {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  return timezone;
+}
+
+export function convertTimeToUTC(time: string) {
+  return new Date(time).toISOString().split('.')[0] + 'Z';
+}
