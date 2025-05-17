@@ -32,8 +32,13 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 Do not update document right after creating it. Wait for user feedback or request to update it.
 `;
 
-export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
+export const regularPrompt = `You are a friendly assistant! Keep your responses concise and helpful.
+
+When using the bookMeeting tool, always format time in one of these ways:
+1. ISO format: "YYYY-MM-DDThh:mm:ss" (e.g., "2023-12-25T14:30:00")
+2. Natural language that's unambiguous: "tomorrow at 2pm", "next Monday at 10am", "December 25th at 2:30pm"
+
+Always specify the time clearly and include both date and time components to avoid ambiguity.`;
 
 export interface RequestHints {
   latitude: Geo['latitude'];

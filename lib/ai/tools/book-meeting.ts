@@ -3,16 +3,13 @@ import { z } from 'zod';
 import { getCurrentTimezone, convertTimeToUTC } from '@/lib/utils';
 
 export const bookMeeting = tool({
-  description: 'Book a meeting with Omnipresence',
+  description: 'Book a meeting with Omnipresence. Time should be specified in ISO format (e.g. "2023-06-20T10:00:00") or as a natural language time (e.g. "tomorrow at 2pm", "next Monday at 10am").',
   parameters: z.object({
-    start: z.string().describe('The meeting start time (e.g., "2023-06-20T10:00:00" or "10 AM tomorrow")'),
+    start: z.string().describe('The meeting start time in ISO format (e.g., "2023-06-20T10:00:00") or natural language (e.g., "tomorrow at 2pm")'),
     name: z.string().describe('Name of the person booking the meeting'),
     email: z.string().describe('Email of the person booking the meeting'),
   }),
   execute: async ({ start, name, email}) => {
-    const url = 'https://api.cal.com/v2/bookings';
-    let requestBody;
-
     try {
       const api_key = process.env.CAL_API_KEY;
       const event_type_id = process.env.CAL_EVENT_TYPE_ID;
@@ -26,14 +23,19 @@ export const bookMeeting = tool({
       }
 
       const eventTypeId = process.env.CAL_EVENT_TYPE_ID;
-
       const converted_timezone = getCurrentTimezone() || "Africa/Nairobi";
 
-      const start_time = convertTimeToUTC(start);
+      // Try to parse the time string
+      let start_time;
+      try {
+        start_time = convertTimeToUTC(start);
+      } catch (error) {
+        return new Error(`Failed to parse time: ${start}. Please use ISO format (e.g., "2023-06-20T10:00:00") or natural language (e.g., "tomorrow at 2pm").`);
+      }
 
-      requestBody = {
+      const requestBody = {
         eventTypeId: eventTypeId,
-        start: start_time, // Using converted UTC time
+        start: start_time,
         attendee: {
           name: name,
           email: email,
@@ -43,6 +45,8 @@ export const bookMeeting = tool({
       };
 
       console.log('Cal.com API Request:', JSON.stringify(requestBody, null, 2));
+
+      const url = 'https://api.cal.com/v2/bookings';
 
       const response = await fetch(url, {
         method: 'POST',
@@ -54,46 +58,20 @@ export const bookMeeting = tool({
         body: JSON.stringify(requestBody),
       });
 
-      const responseData = await response.json();
-
       if (!response.ok) {
-        console.error('Cal.com API Error:', {
-          status: response.status,
-          statusText: response.statusText,
-          data: responseData
-        });
-        throw new Error(`Cal.com API error: ${response.status} - ${JSON.stringify(responseData)}`);
+        const errorData = await response.json().catch(() => null);
+        return new Error(`Cal.com API error: ${response.status} ${response.statusText}${errorData ? ' - ' + JSON.stringify(errorData) : ''}`);
       }
 
+      const bookingData = await response.json();
       return {
         success: true,
-        data: responseData,
-        request: {
-          url,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'cal-api-version': '2024-08-13',
-          },
-          body: requestBody
-        }
+        bookingId: bookingData.id,
+        message: "Meeting successfully booked!",
+        bookingData
       };
-
     } catch (error) {
-      console.error('Booking error:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        request: {
-          url,
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'cal-api-version': '2024-08-13',
-          },
-          body: requestBody
-        }
-      };
+        return error instanceof Error ? error : new Error(String(error));
     }
 },
 });
