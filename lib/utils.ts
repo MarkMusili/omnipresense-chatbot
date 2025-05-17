@@ -95,33 +95,23 @@ export function getCurrentTimezone() {
   return timezone;
 }
 
-/**
- * Converts a time string to UTC format for Cal.com API
- * Handles both ISO format strings and natural language time descriptions
- *
- * @param time - Time string in ISO format or natural language
- * @returns ISO string in UTC format with Z suffix
- */
-export function convertTimeToUTC(time: string): string {
+export function convertTimeToUTC(time: string) {
   try {
-    // Check if time is already in ISO format
+    // Handle ISO format
     if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(time)) {
-      const date = new Date(time);
-      if (isNaN(date.getTime())) {
-        throw new Error(`Invalid ISO time format: ${time}`);
-      }
-      return date.toISOString().split('.')[0] + 'Z';
+      return new Date(time).toISOString();
     }
 
-    // Try to parse natural language time
+    // Handle date strings like "tomorrow at 3pm"
     const date = new Date(time);
     if (isNaN(date.getTime())) {
-      throw new Error(`Could not parse time: ${time}`);
+      throw new Error(`Invalid time format: ${time}`);
     }
 
-    return date.toISOString().split('.')[0] + 'Z';
+    // Format as ISO 8601 with Z for UTC timezone
+    return date.toISOString();
   } catch (error) {
-    console.error('Error converting time to UTC:', error);
-    throw new Error(`Failed to parse time: ${time}`);
+    console.error(`Error converting time: ${time}`, error);
+    throw new Error(`Could not parse time "${time}". Please use ISO 8601 format (YYYY-MM-DDTHH:MM:SS)`);
   }
 }

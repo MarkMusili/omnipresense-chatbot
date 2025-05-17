@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { getCurrentTimezone, convertTimeToUTC } from '@/lib/utils';
 
 export const bookMeeting = tool({
-  description: 'Book a meeting with Omnipresence. Time should be specified in ISO format (e.g. "2023-06-20T10:00:00") or as a natural language time (e.g. "tomorrow at 2pm", "next Monday at 10am").',
+  description: 'Book a meeting with Omnipresence',
   parameters: z.object({
-    start: z.string().describe('The meeting start time in ISO format (e.g., "2023-06-20T10:00:00") or natural language (e.g., "tomorrow at 2pm")'),
+    start: z.string().describe('The meeting start time in ISO 8601 format (e.g., "2023-06-20T10:00:00")'),
     name: z.string().describe('Name of the person booking the meeting'),
     email: z.string().describe('Email of the person booking the meeting'),
   }),
@@ -25,12 +25,16 @@ export const bookMeeting = tool({
       const eventTypeId = process.env.CAL_EVENT_TYPE_ID;
       const converted_timezone = getCurrentTimezone() || "Africa/Nairobi";
 
-      // Try to parse the time string
+      // Convert time to UTC ISO 8601 format
       let start_time;
       try {
         start_time = convertTimeToUTC(start);
       } catch (error) {
-        return new Error(`Failed to parse time: ${start}. Please use ISO format (e.g., "2023-06-20T10:00:00") or natural language (e.g., "tomorrow at 2pm").`);
+        return {
+          success: false,
+          error: `Invalid time format. Please provide time in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).`,
+          details: error instanceof Error ? error.message : String(error)
+        };
       }
 
       const requestBody = {
@@ -60,18 +64,26 @@ export const bookMeeting = tool({
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        return new Error(`Cal.com API error: ${response.status} ${response.statusText}${errorData ? ' - ' + JSON.stringify(errorData) : ''}`);
+        return {
+          success: false,
+          status: response.status,
+          error: 'Failed to book meeting with Cal.com',
+          details: errorData || response.statusText
+        };
       }
 
-      const bookingData = await response.json();
+      const data = await response.json();
       return {
         success: true,
-        bookingId: bookingData.id,
-        message: "Meeting successfully booked!",
-        bookingData
+        data,
+        message: 'Meeting successfully booked'
       };
     } catch (error) {
-        return error instanceof Error ? error : new Error(String(error));
+        return {
+          success: false,
+          error: 'Failed to book meeting',
+          details: error instanceof Error ? error.message : String(error)
+        };
     }
 },
 });

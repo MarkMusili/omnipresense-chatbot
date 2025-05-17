@@ -1,6 +1,16 @@
 import type { ArtifactKind } from '@/components/artifact';
 import type { Geo } from '@vercel/functions';
 
+// Tools instructions
+export const toolsPrompt = `
+When using the bookMeeting tool, always format the time parameter as an ISO 8601 string (YYYY-MM-DDTHH:MM:SS).
+For example:
+- "2024-10-15T14:00:00" for October 15, 2024 at 2:00 PM
+- "2024-11-20T09:30:00" for November 20, 2024 at 9:30 AM
+
+Never use natural language time formats like "tomorrow at 3pm" when using this tool.
+`;
+
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
 
@@ -32,13 +42,8 @@ This is a guide for using artifacts tools: \`createDocument\` and \`updateDocume
 Do not update document right after creating it. Wait for user feedback or request to update it.
 `;
 
-export const regularPrompt = `You are a friendly assistant! Keep your responses concise and helpful.
-
-When using the bookMeeting tool, always format time in one of these ways:
-1. ISO format: "YYYY-MM-DDThh:mm:ss" (e.g., "2023-12-25T14:30:00")
-2. Natural language that's unambiguous: "tomorrow at 2pm", "next Monday at 10am", "December 25th at 2:30pm"
-
-Always specify the time clearly and include both date and time components to avoid ambiguity.`;
+export const regularPrompt =
+  'You are a friendly assistant! Keep your responses concise and helpful.';
 
 export interface RequestHints {
   latitude: Geo['latitude'];
@@ -67,7 +72,7 @@ export const systemPrompt = ({
   if (selectedChatModel === 'chat-model-reasoning') {
     return `${regularPrompt}\n\n${requestPrompt}`;
   } else {
-    return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}`;
+    return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${toolsPrompt}`;
   }
 };
 
