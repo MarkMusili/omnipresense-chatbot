@@ -66,7 +66,8 @@ export const bookMeeting = tool({
     const data = await response.text();
     return data;
     } catch (error: unknown) {
-        return error instanceof Error ? error : String(error);
+        const err = error instanceof Error ? error : String(error);
+        return err.toString();
     }
 },
 });

@@ -87,9 +87,7 @@ function dedupeParts<T extends { type: string; [k: string]: any }>(
 function sanitizeParts<T extends { type: string; [k: string]: any }>(
   parts: T[],
 ): T[] {
-  return parts.filter(
-    (part) => !(part.type === 'reasoning' && part.reasoning === 'undefined'),
-  );
+  return parts;
 }
 
 async function migrateMessages() {

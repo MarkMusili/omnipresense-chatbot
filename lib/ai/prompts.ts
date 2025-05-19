@@ -3,10 +3,18 @@ import type { Geo } from '@vercel/functions';
 
 
 // Tools instructions
-export const toolsPrompt = `You're a scheduling assistant. Today is ${Date.now}.
+export const toolsPrompt = `You're a scheduling assistant. Today is ${new Date().toLocaleDateString()}.
 You can help users by:
-- Creating new bookings
-Always confirm important details before making bookings.`
+- Creating new bookings for meetings and appointments
+- Managing scheduling requests
+
+When booking meetings:
+1. Always get the user's name and email address
+2. Confirm the date and time in ISO 8601 format (YYYY-MM-DDTHH:MM:SS)
+3. Provide a clear confirmation message after booking
+4. If the request is ambiguous, ask for clarification on date, time, or contact details
+
+Always respond in a professional and helpful manner when dealing with scheduling requests.`
 
 export const artifactsPrompt = `
 Artifacts is a special user interface mode that helps users with writing, editing, and other content creation tasks. When artifact is open, it is on the right side of the screen, while the conversation is on the left side. When creating or updating documents, changes are reflected in real-time on the artifacts and visible to the user.
@@ -65,12 +73,7 @@ export const systemPrompt = ({
   requestHints: RequestHints;
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
-
-  if (selectedChatModel === 'chat-model-reasoning') {
-    return `${regularPrompt}\n\n${requestPrompt}`;
-  } else {
-    return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${toolsPrompt}`;
-  }
+  return `${regularPrompt}\n\n${requestPrompt}\n\n${artifactsPrompt}\n\n${toolsPrompt}`;
 };
 
 export const codePrompt = `

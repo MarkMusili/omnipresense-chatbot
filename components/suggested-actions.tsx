@@ -34,9 +34,9 @@ function PureSuggestedActions({
       action: `Help me write an essay about silicon valley`,
     },
     {
-      title: 'What is the weather',
-      label: 'in San Francisco?',
-      action: 'What is the weather in San Francisco?',
+      title: 'Schedule a meeting',
+      label: 'with me for tomorrow at 2pm',
+      action: 'I would like to book a meeting with you tomorrow at 2:00 PM. My name is John Smith and my email is john@example.com',
     },
   ];
 
@@ -52,7 +52,7 @@ function PureSuggestedActions({
           exit={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.05 * index }}
           key={`suggested-action-${suggestedAction.title}-${index}`}
-          className={index > 1 ? 'hidden sm:block' : 'block'}
+          className={index >= 2 ? 'hidden sm:block' : 'block'}
         >
           <Button
             variant="ghost"
