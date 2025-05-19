@@ -2,6 +2,32 @@ import { tool } from 'ai';
 import { z } from 'zod';
 import { getCurrentTimezone, convertTimeToUTC } from '@/lib/utils';
 
+// List of common personal email domains to reject
+const PERSONAL_EMAIL_DOMAINS = [
+  'gmail.com',
+  'yahoo.com',
+  'hotmail.com',
+  'outlook.com',
+  'aol.com',
+  'icloud.com',
+  'protonmail.com',
+  'mail.com',
+  'zoho.com',
+  'yandex.com',
+  'gmx.com',
+  'live.com',
+  'msn.com',
+  'me.com',
+  'inbox.com'
+];
+
+// Function to validate if the email is from a company domain
+const isCompanyEmail = (email: string): boolean => {
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (!domain) return false;
+  return !PERSONAL_EMAIL_DOMAINS.includes(domain);
+};
+
 export const bookMeeting = tool({
   description: 'Book a meeting with Omnipresence',
   parameters: z.object({
@@ -11,6 +37,14 @@ export const bookMeeting = tool({
   }),
   execute: async ({ start, name, email}) => {
     try {
+      // Validate that the email is from a company domain
+      if (!isCompanyEmail(email)) {
+        return {
+          success: false,
+          error: 'Sorry, we only accept company email addresses for booking meetings. Please use your work email.',
+        };
+      }
+
       const api_key = process.env.CAL_API_KEY;
       const event_type_id = process.env.CAL_EVENT_TYPE_ID;
 
