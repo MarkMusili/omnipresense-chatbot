@@ -4,7 +4,7 @@ import {
   wrapLanguageModel,
 } from 'ai';
 import { xai } from '@ai-sdk/xai';
-// import { google } from '@ai-sdk/google';
+import { openai } from '@ai-sdk/openai';
 import { isTestEnvironment } from '../constants';
 import {
   artifactModel,
@@ -24,8 +24,7 @@ export const myProvider = isTestEnvironment
     })
   : customProvider({
       languageModels: {
-        // 'chat-model': google('gemini-2.5-pro-exp-03-25'),
-        'chat-model': xai('grok-2'),
+        'chat-model': openai('gpt-4o-mini-2024-07-18'),
         'chat-model-reasoning': wrapLanguageModel({
           model: xai('grok-3-mini-beta'),
           middleware: extractReasoningMiddleware({ tagName: 'think' }),

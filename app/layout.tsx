@@ -8,8 +8,8 @@ import { SessionProvider } from 'next-auth/react';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://chat.vercel.ai'),
-  title: 'Omnipresence AI',
-  description: 'Omnipresence AI',
+  title: 'OmniPresense AI',
+  description: 'OmniPresense AI',
 };
 
 export const viewport = {
